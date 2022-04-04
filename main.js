@@ -31,7 +31,8 @@ db.mongoose
 
 // Simple route
 app.get("/", (req, res) => {
-  res.json({ message: "Welcome to application." });
+  res.sendFile(__dirname + "/public/index.html");
+  //res.json({ message: "Welcome to application." });
 });
 
 // Routes
@@ -45,7 +46,7 @@ app.listen(PORT, () => {
 
 //Services
 const parseUsers = require("./services/parseUsers.js");
-setInterval(parseUsers, 5000);
+//setInterval(parseUsers, 5000);
 
 //show_users();
 //delete_users(1);
