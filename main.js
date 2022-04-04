@@ -24,9 +24,9 @@ db.mongoose
     })
     .then(() => {
         console.log("Successfully connect to MongoDB.");
-        //initial();
-        //show_users(); //Show all current users in DB on trmianal
-        
+
+        //show_users();
+        //delete_users(10);
     })
     .catch(err => {
         console.error("Connection error", err);
@@ -50,16 +50,6 @@ app.listen(PORT, () => {
 
 
 
-
-
-
-
-
-
-
-
-
-
 //HTTP запрос пользователей с 'https://reqres.in/api/users'
 const getUsersSite = async (page) => {
   try {
@@ -68,13 +58,13 @@ const getUsersSite = async (page) => {
         page: page
       }
     })
-  } catch (error) {
-    console.log(error)
+  } catch (err) {
+    console.log(err)
   }
-} 
+};
 
 //Добавление всех пользователей сайта в массив 'userSiteData'
-const getAllUsersSite = async () => {
+const getAllUsersSite = async (totalDb) => {
   try {
     let usersSiteData=[];
     const usersSite  = await getUsersSite();
@@ -84,124 +74,81 @@ const getAllUsersSite = async () => {
       usersSiteData.push(...usersSiteAll.data.data);
     }
     //console.log (userSiteData)
-    return transferUsers(usersSiteData);
+    return transferUsers(usersSiteData, usersSite.data.total, totalDb);
     
-  } catch (error) {
-    console.log(error)
+  } catch (err) {
+    console.log(err)
   }
-} 
+};
 
-const countUsersSite = async () => {
+//Сравнение количества пользователей сайта и БД
+const compareNumberOfUsers = async () => {
   try {
+    //Сайт
     const usersSite = await getUsersSite()
-    console.log("Всего (сайт): ",usersSite.data.total);
-    return usersSite.data.total
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-const countUsersDb = async () => {
-  try{
+    //База данных
     const users = await User.find({})
-    console.log("Всего (БД): ", users.length)
-    return users.length
-  } catch (error) {
-    console.log(error)
-  }
-}
-
-countUsersSite();
-countUsersDb();
-getAllUsersSite();
-
-
-function transferUsers (usersSiteData){
-
-
-  console.log(usersSiteData);
-}
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-const countsUsersSite = async () => {
-  const usersSite = await getUsersSite(2)
-
-  if(usersSite.data){
     
-    var page, per_page, total, total_pages, data;
-    page = usersSite.data.page;
-    per_page = usersSite.data.per_page;
-    total = usersSite.data.total;
-    total_pages = usersSite.data.total_pages;
-    data = usersSite.data.data;
-    console.log("Total users in site: "+total)
-
-
-    User.find({}, function(err, users){
-      if(err) return console.log(err);
-      console.log("Total users in DB: ", users.length);
-    
-
-      if(total === users.length){
-        console.log("Новых пользователей нет. Всего: ",usersSite.data.total);
-      }else{
-        console.log("users[1]: ",users[0]);
-        console.log("usersSite[1]: ",usersSite.data.data[0]);
-
-
-      }
-
-    });
-    //console.log("New--------------",usersSite.data);
-    //User.insertMany(usersSite.data.data);
-    
+    console.log(Date());
+    if(usersSite.data.total === users.length){
+      console.log("Количество пользоватлей на 'сайте' и 'БД' равно = ", users.length);
+      return;
+    }else{
+      console.log("Всего (сайт): ",usersSite.data.total);
+      console.log("Всего (БД): ", users.length);
+      return getAllUsersSite(users.length);
+    }
+  } catch (err) {
+    console.log(err)
   }
-}
+};
 
-//setInterval(countUsersSite, 5000);
+//Перенос новых пользователй в БД
+function transferUsers (usersSiteData, totalSite, totalDb){
+  try{
 
+    for (let id = totalDb+1; id <= totalSite; id++){
 
+      User.findOne({
+        id: id   
+      }).exec((err, user) => {
 
+          if (err) {
+            console.log(err); 
+            return;
+          }
 
-
-
-
-
-
-
-
-
-
-
-
-// Add test user admin (dev test)
-function initial(){
-    const User = db.user;
-    const user_test = new User({
-        id: 102,
-        email: "Admin3",
-        first_name: "Aydar3",
-        last_name: "Mazitov3",
-        avatar: "https://req3res.in/i22mg/faces/2-image.jpg"
-    }).save(err => {
-      if(err){
-        console.log("error", err);
-      }
-      console.log("added 'user' to roles cpllection");
-    });
+          //Проверка на существущиего пользователя в БД
+          if (user) { 
+            console.log("Ошибка! Пользователь с id: " + id + " уже существует!");
+            return;
+          }
+    
+          //Создание нового пользователя
+          new User({
+            id:         usersSiteData[id-1].id,
+            email:      usersSiteData[id-1].email,
+            first_name: usersSiteData[id-1].first_name,
+            last_name:  usersSiteData[id-1].last_name,
+            avatar:     usersSiteData[id-1].avatar
+          }).save(err => {
+            if (err) {
+              console.log(err);
+              return;
+            }
+            console.log("Пользователь с id: " + id + " добавлен!");
+          });    
+      });
+    }
+  }catch (err) {
+    console.log(err)
   }
+};
+
+setInterval(compareNumberOfUsers, 60000);
+
+
+
 
 // Show all users (dev check)
 function show_users() {
@@ -209,10 +156,15 @@ function show_users() {
     User.find({}, function(err, users){
       if(err) return console.log(err);
       console.log("All users: ", users);
-      
-
-    });
-    
-  }
-
-  
+    }); 
+  };
+// Delete user (dev)
+function delete_users(id) {
+    const User = db.user;
+    User.deleteOne({
+      id: id
+    }, function(err, users){
+      if(err) return console.log(err);
+      console.log("All users: ", users);
+    }); 
+  };
