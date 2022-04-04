@@ -48,7 +48,7 @@ const parseUsers = require("./services/parseUsers.js");
 setInterval(parseUsers, 5000);
 
 //show_users();
-//delete_users(12);
+//delete_users(1);
 
 // Show all users (dev check)
 function show_users() {

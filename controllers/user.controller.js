@@ -2,7 +2,7 @@ const db = require("../models");
 const User = db.user;
 const { user } = require("../models");
 
-// Получить всех пользователей с пагинацией -----------
+// Получить всех пользователей с пагинацией 
 exports.getUsers = (req, res) => {
   try {
     
@@ -49,135 +49,66 @@ exports.getUsers = (req, res) => {
   }
 }
 
-// Получить пользователя ------------------------------
+// Получить пользователя
 exports.getUser = (req, res) => {
   try {
-    
-    //Если запрос без body
-    if(Object.keys(req.body).length === 0){
-      User.findOne({
-        id: req.userId 
-      })
-        .exec((err, user) => {
-          if (err) {
-            res.status(500).send({ 
-              status: 500,
-              message: "Внутренняя ошибка сервера"
-            });
-            return;
-          }
-    
-          //Отправка ответа
-          res.status(200).send({
-            status: 200,
-            data: {
-              id: user.id,
-              email: user.email,
-              first_name: user.first_name,
-              last_name: user.last_name,
-              avatar: user.avatar
-            }
-          });
-        });
-        return;
-    }
-    
-    //Если запрос c body 
-    if(Object.keys(req.body).length != 0){
-      const searchFirstName = req.body.first_name;
-
-      if(!searchLogin) {  
+    const first_name = req.body.first_name;
+    const last_name = req.body.last_name;
+    console.log(first_name);
+    console.log(last_name);
+    if(!first_name && !last_name){
         res.status(402).send({
           status: 402,
-          message: "Ошибка! Требуемый параметр пустой!"
-        });
-        console.log("Ошибка! Требуемый параметр пустой!");
-        return;
-      }
-
-      //Получение любого пользователя (админ)
-      if (req.userRole === "admin") {  
-        User.findOne({
-          first_name: searchFirstName
-        })
-          .exec((err, user) => {
-
-            if (err) { 
-              res.status(500).send({ 
-                status: 500,
-                message: "Внутренняя ошибка сервера"
-              });
-              return;
-            }
-
-            if (!user) {
-              return res.status(404).send({ 
-                status: 404,
-                message: "Пользователь не найден"
-              });
-            }
-
-            //Отправка ответа
-            res.status(200).send({
-              status: 200,
-              data: {
-                id: user.id,
-                email: user.email,
-                first_name: user.first_name,
-                last_name: user.last_name,
-                avatar: user.avatar
-              }
-            });
-          });
-      }
-      //Получение пользователя (юзер)
-      if (req.userRole === "user") {  
-
-        User.findOne({
-          _id: req.userId 
-        })
-          .exec((err, user) => {
-
-            if (err) {
-              res.status(500).send({ 
-                status: 500,
-                message: "Внутренняя ошибка сервера"
-              });
-              return;
-            }
-
-            if (user.login != searchLogin){
-              res.status(403).send({ 
-                status: 403,
-                message: "Отказано в доступе"
-              });
-              return;
-            }
-            //Отправка ответа
-            res.status(200).send({
-              status: 200,
-              data: {
-                id: user._id,
-                login: user.login,
-                role: user.role,
-                password: user.password,
-                department: user.department,
-                name: user.name,
-                surname: user.surname,
-                lastname: user.lastname,
-                rank: user.rank,
-                image: user.image,
-                notesAllow: user.notesAllow,
-                last_login: user.last_login,
-                login_status: user.login_status
-              }
-            });
-          });
-      }
+          message: "Ошибка! Требуемый параметр - пустой!"
+        });   
+        return;     
     }
- 
-  }catch(e){
-    console.log(e)
+    
+    let filtr = {};
+    if(first_name && !last_name){
+      filtr = { first_name: first_name };
+    }
+    if(!first_name && last_name){
+      filtr = { last_name: last_name };
+    }
+    if(first_name && last_name){
+      filtr = { first_name: first_name, last_name: last_name };
+    }
+
+    User.findOne(
+      filtr
+    )
+      .exec((err, user) => {
+        console.log(user);
+        if (err) { 
+          res.status(500).send({ 
+            status: 500,
+            message: "Внутренняя ошибка сервера"
+          });
+          return;
+        }
+
+        if (!user) {
+          return res.status(404).send({ 
+            status: 404,
+            message: "Пользователь не найден"
+          });
+        }
+
+        //Отправка ответа
+        res.status(200).send({
+          status: 200,
+          data: {
+            id: user.id,
+            email: user.email,
+            first_name: user.first_name,
+            last_name: user.last_name,
+            avatar: user.avatar
+          }
+        });
+      });
+  }catch(err){
+    console.log(err)
     res.status(400).send({
       status: 400,
       message: "Ошибка: Вывод пользователя"
