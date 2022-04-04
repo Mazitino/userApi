@@ -19,7 +19,7 @@ const User = mongoose.model(
             required: false,
             maxlength:255
         },
-        lastname:{
+        last_name:{
             type: String,
             required: false,
             maxlength:255
