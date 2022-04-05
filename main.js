@@ -31,8 +31,8 @@ db.mongoose
 
 // Simple route
 app.get("/", (req, res) => {
-  res.sendFile(__dirname + "/public/index.html");
-  //res.json({ message: "Welcome to application." });
+  //res.sendFile(__dirname + "/public/index.html");
+  res.json({ message: "Welcome to application." });
 });
 
 // Routes
