@@ -54,8 +54,9 @@ exports.getUser = (req, res) => {
   try {
     const first_name = req.query.first_name;
     const last_name = req.query.last_name;
-    console.log(first_name);
-    console.log(last_name);
+    console.log("Поиск---------------------");
+    console.log("---ИМЯ: ", first_name);
+    console.log("---ФАМИЛИЯ: ", last_name);
 
 
     if(!first_name && !last_name){
@@ -81,7 +82,7 @@ exports.getUser = (req, res) => {
       filtr
     )
       .exec((err, user) => {
-        console.log(user);
+        console.log("---Найденный пользователь: -------", user);
         if (err) { 
           res.status(500).send({ 
             status: 500,
