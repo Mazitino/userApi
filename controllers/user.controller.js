@@ -17,7 +17,7 @@ exports.getUsers = (req, res) => {
     if(!limit){
       limit = 6;   //Если пусто то лимит выводимых пользователей 6 на 1 страницу
     }
-
+    
     User.find()
     .skip(startIndex)
     .limit(limit)
@@ -52,10 +52,12 @@ exports.getUsers = (req, res) => {
 // Получить пользователя
 exports.getUser = (req, res) => {
   try {
-    const first_name = req.body.first_name;
-    const last_name = req.body.last_name;
+    const first_name = req.query.first_name;
+    const last_name = req.query.last_name;
     console.log(first_name);
     console.log(last_name);
+
+
     if(!first_name && !last_name){
         res.status(402).send({
           status: 402,
