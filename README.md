@@ -1,5 +1,5 @@
 # userApi (node.js)
-Test task for junior developer node.js
+Test task for developer node.js
 
 ## Project setup
 ```
