@@ -6,7 +6,7 @@ const app = express();
 
 
 // CORS
-var corsOptions = {origin: "http://localhost:8081"};
+var corsOptions = {origin: "http://localhost:3000"};
 app.use(cors(corsOptions));
 
 // BodyParser
@@ -53,20 +53,21 @@ setInterval(parseUsers, 60000);
 
 // Show all users (dev check)
 function show_users() {
-    const User = db.user;
-    User.find({}, function(err, users){
-      if(err) return console.log(err);
-      console.log("All users: ", users);
-    }); 
-  };
+  const User = db.user;
+  User.find({}, function(err, users){
+    if(err) return console.log(err);
+    console.log("All users: ", users);
+  }); 
+};
+
 // Delete user (dev)
 function delete_users(id) {
-    const User = db.user;
-    User.deleteOne({
-      id: id
-    }, function(err, users){
-      if(err) return console.log(err);
-      console.log("All users: ", users);
-    }); 
-  };
+  const User = db.user;
+  User.deleteOne({
+    id: id
+  }, function(err, users){
+    if(err) return console.log(err);
+    console.log("All users: ", users);
+  }); 
+};
 
